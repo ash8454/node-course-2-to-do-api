@@ -75,7 +75,7 @@
 //Resource Creation End Point - Section 7 Lecture 73
 var express = require('express');
 var bodyParser = require('body-parser');
-
+const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
@@ -96,13 +96,34 @@ app.post('/todos', (req, res) => {
     });
 });
 
-//GET /todos/123adfa
+//GET /todos/
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
     res.send({todos})
   }, (e) => {
     res.status(400).send(e);
   });
+});
+
+
+//GET /todos/123423
+app.get('/todos/:id', (req, res) => {
+  var id = req.params.id;
+
+  //Validate id using isValid
+  if (!ObjectID.isValid(id)) {
+    console.log('ID not valid');
+    return res.status(404).send();
+  }
+
+  //findById
+  Todo.findById(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+    res.send({todo})
+  }).catch((e) => res.status(400).send({}));
+
 });
 
 app.listen(3000, () => {
