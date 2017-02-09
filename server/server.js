@@ -73,6 +73,9 @@
 // });
 
 //Resource Creation End Point - Section 7 Lecture 73
+
+
+require('./config/config');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
