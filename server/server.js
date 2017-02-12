@@ -198,20 +198,20 @@ app.post('/users', (req, res) => {
     });
 });
 
-var authenticate = (req, res, next) => {
-  var token = req.header('x-auth');
-
-  User.findByToken(token).then((user) => {
-    if (!user) {
-      return Promise.reject();
-    }
-    req.user = user;
-    req.token = token;
-    next();
-  }).catch((e) => {
-    res.status(401).send();
-  });
-}
+// var authenticate = (req, res, next) => {
+//   var token = req.header('x-auth');
+//
+//   User.findByToken(token).then((user) => {
+//     if (!user) {
+//       return Promise.reject();
+//     }
+//     req.user = user;
+//     req.token = token;
+//     next();
+//   }).catch((e) => {
+//     res.status(401).send();
+//   });
+// }
 
 app.get('/users/me', authenticate, (req, res) => {
   // var token = req.header('x-auth');
@@ -227,6 +227,23 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 })
 
+
+// POST /users/login {email, password}
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password'])
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+    //res.send(user);
+  }).catch((e) => {
+    res.status(400).send();
+  });
+  //res.send(body);
+});
+
+
+// app.delete('/users/me/token', )
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);

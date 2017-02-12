@@ -44,6 +44,7 @@ var UserSchema = new mongoose.Schema({
   }]
 });
 
+//override method to hide access and token
 UserSchema.methods.toJSON = function() {
   var user = this;
   var userObject = user.toObject();
@@ -81,6 +82,26 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+  return User.findOne({email}).then((user) => {
+    if (!user) {
+      console.log("User doesn't exist");
+      return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) {
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
+  });
+}
+//Before saving the data, hash the password
 UserSchema.pre('save', function (next) {
     var user = this;
 
